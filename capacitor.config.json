@@ -1,0 +1,9 @@
+{
+  "appId": "com.catatankebun.app",
+  "appName": "Catatan Kebun",
+  "webDir": "www",
+  "android": {
+    "useLegacyBridge": true,
+    "adjustMarginsForEdgeToEdge": "auto"
+  }
+}

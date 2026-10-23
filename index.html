@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Catatan Kebun</title>
+<style>
+:root{--bg:#F2F5EE;--sf:#FFFFFF;--ink:#1B2A1F;--mut:#5C6B60;--gr:#2E7D4F;--grs:#DCEBDD;--ln:#D8DFD1;--er:#B3261E;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111812;--sf:#1A241C;--ink:#E7EFE5;--mut:#9BAA9E;--gr:#6FCF97;--grs:#213A2A;--ln:#2A372C;--er:#F2877F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111812;--sf:#1A241C;--ink:#E7EFE5;--mut:#9BAA9E;--gr:#6FCF97;--grs:#213A2A;--ln:#2A372C;--er:#F2877F;color-scheme:dark}
+html{background:var(--bg);scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5}
+main{max-width:560px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0 0 16px}
+h2{font-size:18px;font-weight:800;margin:0}
+.status{display:flex;gap:16px;align-items:center;background:var(--sf);border:1px solid var(--ln);border-radius:16px;padding:18px}
+.ring{flex:none;width:48px;height:48px;border-radius:50%;border:4px solid var(--gr);position:relative}
+.ring[data-s="in"]{background:var(--gr)}
+.ring[data-s="in"]::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--gr);animation:p 2.4s ease-out infinite}
+.ring[data-s="off"]{border-color:var(--mut);border-style:dashed}
+.ring[data-s="err"]{border-color:var(--er)}
+@keyframes p{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ring[data-s="in"]::after{animation:none}}
+.big{font-size:20px;font-weight:800;line-height:1.25}
+.sub{color:var(--mut);font-size:14px;margin-top:2px}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--gr);background:var(--gr);color:var(--bg);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--gr)}
+.btn:focus-visible,.del:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gr);outline-offset:2px}
+.row{display:flex;gap:10px;align-items:center;margin:12px 0 0;flex-wrap:wrap}
+.msg{color:var(--mut);font-size:14px;margin:0}
+details{margin:20px 0 0;border-top:1px solid var(--ln);border-bottom:1px solid var(--ln);padding:12px 0}
+summary{font-weight:600;cursor:pointer;min-height:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+label{display:block;font-size:14px;color:var(--mut)}
+input{width:100%;font:inherit;min-height:44px;padding:0 12px;margin-top:4px;border:1px solid var(--ln);border-radius:10px;background:var(--sf);color:var(--ink)}
+.full{grid-column:1/-1}
+.head{display:flex;justify-content:space-between;align-items:center;margin:28px 0 12px}
+.entry{background:var(--sf);border:1px solid var(--ln);border-left:4px solid var(--gr);border-radius:12px;padding:14px;margin-bottom:12px}
+.entry.man{border-left-color:var(--mut)}
+.eh{display:flex;flex-direction:column;margin-bottom:10px}
+.eh span{color:var(--mut);font-size:14px}
+textarea{display:block;width:100%;font:inherit;padding:10px 12px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--ink);resize:vertical;min-height:84px}
+.del{font:inherit;font-size:14px;min-height:40px;margin-top:8px;padding:0 4px;border:0;background:none;color:var(--er);cursor:pointer}
+.empty{color:var(--mut);margin:0}
+</style>
+</head>
+<body>
+<main>
+<h1>Catatan kebun</h1>
+
+<section class="status" aria-live="polite">
+  <div class="ring" id="ring" data-s="off"></div>
+  <div><div class="big" id="big">Mencari lokasimu…</div><div class="sub" id="sub"></div></div>
+</section>
+<div class="row">
+  <button class="btn ghost" id="manual" type="button">Catat hadir sekarang</button>
+  <button class="btn" id="opts" type="button" hidden>Buka setelan izin</button>
+  <p class="msg" id="mmsg"></p>
+</div>
+
+<details id="set">
+  <summary>Atur titik kebun</summary>
+  <div class="grid">
+    <label>Garis lintang<input id="lat" inputmode="decimal" placeholder="-7.2000"></label>
+    <label>Garis bujur<input id="lng" inputmode="decimal" placeholder="109.9000"></label>
+    <label class="full">Radius kebun (meter)<input id="rad" inputmode="numeric" value="100"></label>
+  </div>
+  <div class="row">
+    <button class="btn ghost" id="here" type="button">Pakai lokasi saya sekarang</button>
+    <button class="btn" id="save" type="button">Simpan titik</button>
+  </div>
+  <p class="msg" id="smsg" style="margin-top:10px"></p>
+</details>
+
+<div class="head">
+  <h2>Daftar kehadiran</h2>
+  <button class="btn ghost" id="copy" type="button" hidden>Salin rekap</button>
+</div>
+<p class="empty" id="empty">Belum ada kehadiran. Saat kamu masuk area kebun, catatan hari ini muncul di sini.</p>
+<div id="list"></div>
+</main>
+
+<script>
+(function(){
+var KEY='catatan-kebun-v1',state={spot:null,entries:[]},last=null,gerr=null;
+function $(i){return document.getElementById(i)}
+function load(){try{var s=localStorage.getItem(KEY);if(s){var o=JSON.parse(s)||{};state.spot=o.spot||null;state.entries=Array.isArray(o.entries)?o.entries:[]}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function p2(n){return(n<10?'0':'')+n}
+function dayKey(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function dist(a,b,c,d){var R=6371000,t=Math.PI/180,x=(c-a)*t,y=(d-b)*t;var h=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*t)*Math.cos(c*t)*Math.sin(y/2)*Math.sin(y/2);return 2*R*Math.asin(Math.sqrt(h))}
+function fmtD(ts){return new Date(ts).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'short',year:'numeric'})}
+function fmtT(ts){return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
+function fmtDist(m){return m>=1000?(m/1000).toFixed(1).replace('.',',')+' km':Math.round(m)+' m'}
+function todayEntry(){var k=dayKey(new Date());return state.entries.find(function(e){return e.day===k})}
+function addEntry(src){if(todayEntry())return false;var n=new Date();state.entries.push({id:String(n.getTime()),day:dayKey(n),ts:n.getTime(),activity:'',src:src});save();renderList();if(src==='auto')notify();return true}
+var LN;
+function notify(){try{if(LN)LN.schedule({notifications:[{id:Math.floor(Date.now()/1000)%2147483000,title:'Kehadiran kebun tercatat',body:'Kamu sudah di kebun. Buka aplikasi untuk menulis kegiatan.'}]}).catch(function(){})}catch(e){}}
+
+function renderStatus(){
+  var st,bt,sb,d;
+  if(gerr){st='err';bt='Lokasi tidak terbaca';sb=gerr}
+  else if(!state.spot){st='off';bt='Titik kebun belum diatur';sb=last?'Buka Atur titik kebun, lalu pakai lokasi saat ini.':'Menunggu sinyal lokasi…'}
+  else if(!last){st='off';bt='Mencari lokasimu…';sb='Biarkan halaman ini terbuka.'}
+  else{
+    d=dist(last.latitude,last.longitude,state.spot.lat,state.spot.lng);
+    var acc=' Akurasi GPS sekitar '+Math.round(last.accuracy||0)+' m.';
+    if(d<=state.spot.r){var te=todayEntry();st='in';bt='Kamu di kebun';sb=(te?'Kehadiran hari ini tercatat jam '+fmtT(te.ts)+'.':'Mencatat kehadiran…')+acc}
+    else{st='out';bt='Di luar kebun';sb='Jarak '+fmtDist(d)+', radius kebun '+state.spot.r+' m.'+acc}
+  }
+  $('ring').setAttribute('data-s',st);$('big').textContent=bt;$('sub').textContent=sb;
+}
+function evaluate(){
+  if(state.spot&&last&&dist(last.latitude,last.longitude,state.spot.lat,state.spot.lng)<=state.spot.r)addEntry('auto');
+  renderStatus();
+}
+function renderList(){
+  var L=$('list');L.textContent='';
+  var arr=state.entries.slice().sort(function(a,b){return b.ts-a.ts});
+  $('empty').hidden=arr.length>0;$('copy').hidden=!arr.length;
+  arr.forEach(function(e){
+    var a=document.createElement('article');a.className='entry '+(e.src==='auto'?'auto':'man');
+    var h=document.createElement('div');h.className='eh';
+    var d=document.createElement('strong');d.textContent=fmtD(e.ts);
+    var t=document.createElement('span');t.textContent='Masuk jam '+fmtT(e.ts)+(e.src==='auto'?', otomatis':', dicatat manual');
+    h.append(d,t);
+    var ta=document.createElement('textarea');ta.value=e.activity||'';ta.placeholder='Tulis kegiatan di kebun…';ta.setAttribute('aria-label','Kegiatan '+fmtD(e.ts));ta.dataset.id=e.id;
+    var x=document.createElement('button');x.type='button';x.className='del';x.textContent='Hapus';x.dataset.id=e.id;
+    a.append(h,ta,x);L.append(a);
+  });
+}
+$('list').addEventListener('input',function(ev){
+  var t=ev.target;if(t.tagName!=='TEXTAREA')return;
+  var e=state.entries.find(function(x){return x.id===t.dataset.id});
+  if(e){e.activity=t.value;save()}
+});
+$('list').addEventListener('click',function(ev){
+  var b=ev.target;if(!b.classList.contains('del'))return;
+  if(b.dataset.arm==='1'){state.entries=state.entries.filter(function(x){return x.id!==b.dataset.id});save();renderList();renderStatus();return}
+  b.dataset.arm='1';b.textContent='Yakin hapus?';
+  setTimeout(function(){if(b.isConnected){b.dataset.arm='';b.textContent='Hapus'}},3000);
+});
+
+$('manual').onclick=function(){$('mmsg').textContent=addEntry('manual')?'Kehadiran hari ini dicatat.':'Hari ini sudah tercatat.';renderStatus()};
+$('here').onclick=function(){
+  if(!last){$('smsg').textContent='Lokasi belum terbaca. Izinkan akses lokasi dan tunggu sebentar.';return}
+  $('lat').value=last.latitude.toFixed(6);$('lng').value=last.longitude.toFixed(6);
+  $('smsg').textContent='Terisi dari lokasimu sekarang. Tekan Simpan titik.';
+};
+$('save').onclick=function(){
+  var la=parseFloat(String($('lat').value).replace(',','.')),lo=parseFloat(String($('lng').value).replace(',','.')),r=parseInt($('rad').value,10);
+  if(!isFinite(la)||!isFinite(lo)||Math.abs(la)>90||Math.abs(lo)>180){$('smsg').textContent='Koordinat belum valid. Isi lintang dan bujur dengan angka.';return}
+  if(!isFinite(r)||r<20){$('smsg').textContent='Radius minimal 20 meter.';return}
+  state.spot={lat:la,lng:lo,r:r};save();
+  $('smsg').textContent='Titik kebun tersimpan.';evaluate();
+};
+$('copy').onclick=function(){
+  var txt=state.entries.slice().sort(function(a,b){return a.ts-b.ts}).map(function(e){return fmtD(e.ts)+', masuk '+fmtT(e.ts)+'\n'+(e.activity||'(belum ada kegiatan)')}).join('\n\n');
+  function done(ok){var b=$('copy');b.textContent=ok?'Tersalin':'Gagal menyalin';setTimeout(function(){b.textContent='Salin rekap'},1800)}
+  function fb(){try{var t=document.createElement('textarea');t.value=txt;document.body.append(t);t.select();var ok=document.execCommand('copy');t.remove();done(ok)}catch(e){done(false)}}
+  try{navigator.clipboard.writeText(txt).then(function(){done(true)},fb)}catch(e){fb()}
+};
+
+function onPos(p){last=p.coords||p;gerr=null;evaluate()}
+function onErr(e){
+  if(e.code===1)gerr='Izin lokasi ditolak. Izinkan lokasi untuk halaman ini, atau pakai tombol Catat hadir sekarang.';
+  else if(!last)gerr='Sinyal GPS belum didapat. Coba di tempat terbuka.';
+  renderStatus();
+}
+load();
+if(state.spot){$('lat').value=state.spot.lat;$('lng').value=state.spot.lng;$('rad').value=state.spot.r}
+$('set').open=!state.spot;
+renderList();renderStatus();
+var Cap=window.Capacitor;
+if(Cap&&Cap.isNativePlatform&&Cap.isNativePlatform()){
+  var BG=Cap.registerPlugin('BackgroundGeolocation');
+  LN=Cap.registerPlugin('LocalNotifications');
+  try{LN.requestPermissions().catch(function(){})}catch(e){}
+  $('opts').onclick=function(){try{BG.openSettings()}catch(e){}};
+  BG.addWatcher({backgroundTitle:'Catatan Kebun',backgroundMessage:'Memantau kedatanganmu di kebun',requestPermissions:true,stale:false,distanceFilter:10},function(loc,err){
+    if(err){
+      if(err.code==='NOT_AUTHORIZED'){gerr='Izin lokasi belum diberikan. Buka setelan izin, pilih Lokasi, lalu izinkan.';$('opts').hidden=false}
+      else if(!last)gerr='Sinyal GPS belum didapat. Coba di tempat terbuka.';
+      renderStatus();return;
+    }
+    $('opts').hidden=true;onPos(loc);
+  }).catch(function(){gerr='Pemantauan lokasi gagal dimulai.';renderStatus()});
+}else if(navigator.geolocation){
+  try{navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:10000,timeout:30000})}catch(e){gerr='Akses lokasi tidak tersedia. Pakai tombol Catat hadir sekarang.';renderStatus()}
+}else{gerr='Akses lokasi tidak tersedia di sini. Pakai tombol Catat hadir sekarang.';renderStatus()}
+})();
+</script>
+</body>
+</html>
